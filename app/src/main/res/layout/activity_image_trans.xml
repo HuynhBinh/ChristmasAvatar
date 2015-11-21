@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
@@ -9,7 +10,7 @@
         android:id="@+id/rltImage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true">
+        android:layout_alignParentTop="true">
 
         <ImageView
             android:id="@+id/imvMain"
@@ -19,17 +20,18 @@
             android:adjustViewBounds="true" />
 
         <ImageView
+            android:id="@+id/imvCover"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/imvMain"
             android:layout_alignLeft="@+id/imvMain"
             android:layout_alignRight="@+id/imvMain"
             android:layout_alignTop="@+id/imvMain"
-            android:scaleType="fitXY"
-            android:src="@drawable/transparent_france_flag" />
+            android:scaleType="fitXY" />
     </RelativeLayout>
 
     <LinearLayout
+        android:id="@+id/lnlFooter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -97,4 +99,15 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
+    <org.lucasr.twowayview.widget.TwoWayView
+        android:id="@+id/twoWayView"
+        style="@style/TwoWayView"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dm_80dp"
+        android:layout_above="@+id/lnlFooter"
+        android:layout_marginBottom="@dimen/dm_20dp"
+        android:background="@color/transparent"
+        android:scrollbars="none"
+        app:twowayview_layoutManager="ListLayoutManager" />
 </RelativeLayout>
