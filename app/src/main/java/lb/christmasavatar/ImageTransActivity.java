@@ -2,6 +2,7 @@ package lb.christmasavatar;
 
 import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -23,6 +24,7 @@ import com.soundcloud.android.crop.Crop;
 import org.lucasr.twowayview.ItemClickSupport;
 import org.lucasr.twowayview.widget.TwoWayView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -33,13 +35,17 @@ import java.util.List;
  */
 public class ImageTransActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private int CAMERA_REQUEST = 123;
+
     private ImageView imvMain;
     private ImageView imvCover;
     private LinearLayout lnlSave;
     private LinearLayout lnlShare;
     private TwoWayView twoWayView;
+    private RelativeLayout rltImage;
 
     private List<Integer> images;
+    private List<Integer> thumbs;
     private ShapeAdapter shapeAdapter;
 
     private String filename;
@@ -65,6 +71,7 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
         lnlSave = (LinearLayout) findViewById(R.id.lnlSave);
         lnlShare = (LinearLayout) findViewById(R.id.lnlShare);
         twoWayView = (TwoWayView) findViewById(R.id.twoWayView);
+        rltImage = (RelativeLayout) findViewById(R.id.rltImage);
 
         lnlSave.setOnClickListener(this);
         lnlShare.setOnClickListener(this);
@@ -75,23 +82,31 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
     private void initData() {
         filename = null;
 
-        openImagePicker();
+        if (getIntent().hasExtra("camera")) {
+            openCamera();
+        } else {
+            openImagePicker();
+        }
 
         images = new ArrayList<>();
-        images.add(R.drawable.christmas_1);
-        images.add(R.drawable.christmas_2);
-        images.add(R.drawable.christmas_1);
-        images.add(R.drawable.christmas_2);
-        images.add(R.drawable.christmas_1);
-        images.add(R.drawable.christmas_2);
-        images.add(R.drawable.christmas_1);
-        images.add(R.drawable.christmas_2);
-        images.add(R.drawable.christmas_1);
-        images.add(R.drawable.christmas_2);
-        images.add(R.drawable.christmas_1);
-        images.add(R.drawable.christmas_2);
+        images.add(R.drawable.chirst_1);
+        images.add(R.drawable.chirst_2);
+        images.add(R.drawable.chirst_3);
+        images.add(R.drawable.chirst_4);
+        images.add(R.drawable.chirst_5);
+        images.add(R.drawable.chirst_6);
+        images.add(R.drawable.chirst_7);
 
-        shapeAdapter = new ShapeAdapter(this, twoWayView, images, 0);
+        thumbs = new ArrayList<>();
+        thumbs.add(R.drawable.thumb_1);
+        thumbs.add(R.drawable.thumb_2);
+        thumbs.add(R.drawable.thumb_3);
+        thumbs.add(R.drawable.thumb_4);
+        thumbs.add(R.drawable.thumb_5);
+        thumbs.add(R.drawable.thumb_6);
+        thumbs.add(R.drawable.thumb_7);
+
+        shapeAdapter = new ShapeAdapter(this, twoWayView, thumbs, 0);
         twoWayView.setAdapter(shapeAdapter);
 
         imvCover.setImageResource(images.get(0));
@@ -103,6 +118,7 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
                 imvCover.setImageResource(images.get(position));
                 shapeAdapter.chooseItem(position);
                 filename = null;
+                rltImage.invalidate();
             }
         });
     }
@@ -116,6 +132,12 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
 //            setResult(Activity.RESULT_CANCELED, returnIntent);
 //        }
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        deleteTempFile();
     }
 
     @Override
@@ -136,12 +158,21 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
         Crop.pickImage(this);
     }
 
+    private void openCamera() {
+        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, createTempFile());
+        startActivityForResult(cameraIntent, CAMERA_REQUEST);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Crop.REQUEST_PICK && resultCode == RESULT_OK) {
             beginCrop(data.getData());
         } else if (requestCode == Crop.REQUEST_CROP && resultCode == RESULT_OK) {
             handleCrop(resultCode, data);
+        } else if (requestCode == CAMERA_REQUEST && resultCode == RESULT_OK) {
+            Uri uri = getTempFile();
+            beginCrop(uri);
         } else {
             finish();
         }
@@ -150,7 +181,6 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
     private void beginCrop(Uri source) {
         Uri destination = Uri.fromFile(new File(getCacheDir(), "cropped"));
         Crop.of(source, destination).asSquare().start(this);
-
     }
 
     private void handleCrop(int resultCode, Intent result) {
@@ -220,7 +250,6 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
     }
 
     private Bitmap convertViewToBitmap() {
-        RelativeLayout rltImage = (RelativeLayout) findViewById(R.id.rltImage);
         rltImage.setDrawingCacheEnabled(true);
         rltImage.buildDrawingCache();
         return rltImage.getDrawingCache();
@@ -253,6 +282,86 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
         } finally {
 
         }
+    }
+
+    private File saveImageCameraToSDCard(Bitmap bitmap) {
+        deleteTempFile();
+        String imageName = "temp";
+        String root = Environment.getExternalStorageDirectory().toString();
+        File myDir = new File(root + "/temp");
+
+        if (!myDir.exists()) {
+            myDir.mkdirs();
+        }
+
+        String fname = imageName + ".png";
+        File file = new File(myDir, fname);
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+            out.flush();
+            out.close();
+//            ContentValues image = new ContentValues();
+//            image.put(MediaStore.Images.Media.DATA, file.getAbsolutePath());
+//            getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, image);
+            sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+            return file;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+
+        }
+    }
+
+    private void deleteTempFile() {
+        String imageName = "temp";
+        String root = Environment.getExternalStorageDirectory().toString();
+        File myDir = new File(root + "/temp");
+
+        if (!myDir.exists()) {
+            myDir.mkdirs();
+        }
+
+        String fname = imageName + ".jpg";
+        String fpath = myDir.getAbsolutePath() + "/" + fname;
+
+        File file = new File(fpath);
+        file.delete();
+
+        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File(fpath))));
+    }
+
+    private Uri createTempFile() {
+        deleteTempFile();
+        String imageName = "temp";
+        String root = Environment.getExternalStorageDirectory().toString();
+        File myDir = new File(root + "/temp");
+
+        if (!myDir.exists()) {
+            myDir.mkdirs();
+        }
+
+        String fname = imageName + ".jpg";
+        File file = new File(myDir, fname);
+        Uri uri = Uri.fromFile(file);
+
+//        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+
+        return uri;
+    }
+
+    private Uri getTempFile() {
+        String imageName = "temp";
+        String root = Environment.getExternalStorageDirectory().toString();
+        File myDir = new File(root + "/temp");
+        String fname = imageName + ".jpg";
+        File file = new File(myDir, fname);
+        Uri uri = Uri.fromFile(file);
+
+        sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(file)));
+
+        return uri;
     }
 
     private int getScreenWidth() {
