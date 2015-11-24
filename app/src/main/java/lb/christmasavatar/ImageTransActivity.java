@@ -77,6 +77,11 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
         lnlShare.setOnClickListener(this);
 
         twoWayView.setHasFixedSize(true);
+
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) imvMain.getLayoutParams();
+        layoutParams.width = getScreenWidth();
+        layoutParams.height = getScreenWidth();
+        imvMain.setLayoutParams(layoutParams);
     }
 
     private void initData() {
@@ -96,6 +101,20 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
         images.add(R.drawable.chirst_5);
         images.add(R.drawable.chirst_6);
         images.add(R.drawable.chirst_7);
+        images.add(R.drawable.chirst_8);
+        images.add(R.drawable.chirst_9);
+        images.add(R.drawable.chirst_10);
+        images.add(R.drawable.chirst_11);
+        images.add(R.drawable.chirst_12);
+        images.add(R.drawable.chirst_13);
+        images.add(R.drawable.chirst_14);
+        images.add(R.drawable.chirst_15);
+        images.add(R.drawable.chirst_16);
+        images.add(R.drawable.chirst_17);
+        images.add(R.drawable.chirst_18);
+        images.add(R.drawable.chirst_19);
+        images.add(R.drawable.chirst_20);
+        images.add(R.drawable.chirst_21);
 
         thumbs = new ArrayList<>();
         thumbs.add(R.drawable.thumb_1);
@@ -105,6 +124,20 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
         thumbs.add(R.drawable.thumb_5);
         thumbs.add(R.drawable.thumb_6);
         thumbs.add(R.drawable.thumb_7);
+        thumbs.add(R.drawable.thumb_8);
+        thumbs.add(R.drawable.thumb_9);
+        thumbs.add(R.drawable.thumb_10);
+        thumbs.add(R.drawable.thumb_11);
+        thumbs.add(R.drawable.thumb_12);
+        thumbs.add(R.drawable.thumb_13);
+        thumbs.add(R.drawable.thumb_14);
+        thumbs.add(R.drawable.thumb_15);
+        thumbs.add(R.drawable.thumb_16);
+        thumbs.add(R.drawable.thumb_17);
+        thumbs.add(R.drawable.thumb_18);
+        thumbs.add(R.drawable.thumb_19);
+        thumbs.add(R.drawable.thumb_20);
+        thumbs.add(R.drawable.thumb_21);
 
         shapeAdapter = new ShapeAdapter(this, twoWayView, thumbs, 0);
         twoWayView.setAdapter(shapeAdapter);
@@ -250,7 +283,8 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
     }
 
     private Bitmap convertViewToBitmap() {
-        rltImage.setDrawingCacheEnabled(true);
+        rltImage.setDrawingCacheEnabled(false);
+        rltImage.destroyDrawingCache();
         rltImage.buildDrawingCache();
         return rltImage.getDrawingCache();
     }

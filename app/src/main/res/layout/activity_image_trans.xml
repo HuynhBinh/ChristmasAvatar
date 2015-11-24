@@ -16,7 +16,7 @@
             android:id="@+id/imvMain"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_centerHorizontal="true"
             android:adjustViewBounds="true" />
 
         <ImageView
@@ -26,8 +26,7 @@
             android:layout_alignBottom="@+id/imvMain"
             android:layout_alignLeft="@+id/imvMain"
             android:layout_alignRight="@+id/imvMain"
-            android:layout_alignTop="@+id/imvMain"
-            android:scaleType="fitXY" />
+            android:layout_alignTop="@+id/imvMain" />
     </RelativeLayout>
 
     <LinearLayout
