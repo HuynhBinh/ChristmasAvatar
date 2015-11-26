@@ -37,7 +37,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        initialAdmob();
+        initialAdmob();
 
         initView();
         initData();
@@ -80,9 +80,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-//            showFullAd();
-//        }
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+            showFullAd();
+        }
     }
 
     // Method to share any text.
@@ -100,7 +100,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         adRequest = new AdRequest.Builder().build();
 
         interstitial = new InterstitialAd(this);
-        interstitial.setAdUnitId("ca-app-pub-6956931160448072/2400734747");
+        interstitial.setAdUnitId("ca-app-pub-6956931160448072/7329152747");
 
         interstitial.setAdListener(new AdListener() {
             @Override

@@ -1,10 +1,12 @@
 package lb.christmasavatar;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,6 +43,7 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
     private ImageView imvCover;
     private LinearLayout lnlSave;
     private LinearLayout lnlShare;
+    private LinearLayout lnlRotate;
     private TwoWayView twoWayView;
     private RelativeLayout rltImage;
 
@@ -53,6 +56,8 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
     private ProgressDialog progress_dialog;
 
     private boolean isShowAd;
+
+    private Bitmap bmImvMain;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,11 +75,13 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
         imvCover = (ImageView) findViewById(R.id.imvCover);
         lnlSave = (LinearLayout) findViewById(R.id.lnlSave);
         lnlShare = (LinearLayout) findViewById(R.id.lnlShare);
+        lnlRotate = (LinearLayout) findViewById(R.id.lnlRotate);
         twoWayView = (TwoWayView) findViewById(R.id.twoWayView);
         rltImage = (RelativeLayout) findViewById(R.id.rltImage);
 
         lnlSave.setOnClickListener(this);
         lnlShare.setOnClickListener(this);
+        lnlRotate.setOnClickListener(this);
 
         twoWayView.setHasFixedSize(true);
 
@@ -158,12 +165,15 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
 
     @Override
     public void onBackPressed() {
+        Intent returnIntent = new Intent();
+        if (isShowAd) {
+            setResult(Activity.RESULT_OK, returnIntent);
+        } else {
+            setResult(Activity.RESULT_CANCELED, returnIntent);
+        }
+
 //        Intent returnIntent = new Intent();
-//        if (isShowAd) {
 //        setResult(Activity.RESULT_OK, returnIntent);
-//        } else {
-//            setResult(Activity.RESULT_CANCELED, returnIntent);
-//        }
         finish();
     }
 
@@ -171,6 +181,7 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
     protected void onDestroy() {
         super.onDestroy();
         deleteTempFile();
+        bmImvMain.recycle();
     }
 
     @Override
@@ -183,6 +194,10 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
             case R.id.lnlShare:
                 ShareImageAsync shareImageAsync = new ShareImageAsync();
                 shareImageAsync.execute();
+                break;
+            case R.id.lnlRotate:
+                RotateImageAsync rotateImageAsync = new RotateImageAsync();
+                rotateImageAsync.execute();
                 break;
         }
     }
@@ -220,12 +235,12 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
         if (resultCode == RESULT_OK) {
             Uri selectedImageUri = Crop.getOutput(result);
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
+                bmImvMain = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImageUri);
                 int screenWidth = getScreenWidth();
-                if (bitmap.getWidth() > screenWidth) {
-                    bitmap = Bitmap.createScaledBitmap(bitmap, screenWidth, screenWidth, false);
+                if (bmImvMain.getWidth() > screenWidth) {
+                    bmImvMain = Bitmap.createScaledBitmap(bmImvMain, screenWidth, screenWidth, false);
                 }
-                imvMain.setImageBitmap(bitmap);
+                imvMain.setImageBitmap(bmImvMain);
             } catch (Exception e) {
 
             }
@@ -279,6 +294,32 @@ public class ImageTransActivity extends AppCompatActivity implements View.OnClic
             hideProgressDialog();
             shareImage(filename);
             isShowAd = true;
+        }
+    }
+
+    private class RotateImageAsync extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+//            showProgressDialog();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if (bmImvMain != null) {
+                Matrix matrix = new Matrix();
+                matrix.postRotate(90);
+                bmImvMain = Bitmap.createBitmap(bmImvMain, 0, 0, bmImvMain.getWidth(), bmImvMain.getHeight(), matrix, true);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+//            hideProgressDialog();
+            if (bmImvMain != null) {
+                imvMain.setImageBitmap(bmImvMain);
+            }
         }
     }
 
